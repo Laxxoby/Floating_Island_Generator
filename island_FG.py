@@ -22,6 +22,18 @@ def main():
 
 # Crear un objeto que sea un cubo
 class Cubo: 
+    """
+    Representa un objeto cúbico en un sistema tridimensional.
+
+    Args:
+    - origen (list): Una lista que representa las coordenadas [x, y, z] del origen del cubo.
+
+    Attributes:
+    - origen (list): Coordenadas [x, y, z] del origen del cubo.
+    - vertices (numpy.ndarray): Matriz que contiene las coordenadas de los vértices del cubo.
+    - caras (list): Lista que contiene las caras del cubo, definidas por sus vértices.
+
+    """
     def __init__(self, origen): #ejem [0.5, 0.5, 0.5]
         x,y,z = origen[0], origen[1], origen[2]
         self.origen = origen
