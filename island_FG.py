@@ -70,9 +70,7 @@ def generar_plataforma():
                 ax.add_collection3d(cubo)
                 artura = AlturaIsla(distancia, radio, altura, i, j, modeIsland)    
                 ArrAltura[i, j] = artura        
-    crear_cuadrados_svg(ArrAltura)
-                
-    #ax.text(0.5, 0.5, 0.5 + 0.2, "Texto en la cara", color='red', fontsize=12, ha='center')
+    crear_cuadrados_svg(ArrAltura,radio)
                 
     # Establecer los límites de los ejes
     ax.set_xlim([0, (radio * 2) + 1])
@@ -85,7 +83,7 @@ def generar_plataforma():
     ax.set_zlabel('Z')
 
     # Mostrar el gráfico
-    plt.show()
+    #plt.show()
 
 def AlturaIsla(distancia, radio, altura, i, j, modeIsland):
     """
@@ -117,7 +115,7 @@ def AlturaIsla(distancia, radio, altura, i, j, modeIsland):
         Cubos_altura = random.randint(1 if modeIsland == "random" else int(altura * 0.2), int(altura * 0.4))
     elif porcentaje <= 20 and porcentaje > 0:
         Cubos_altura = random.randint(1 , int(altura * 0.2))
-        ax.text(i + 0.5, j + 0.5, altura + 1.5, str(Cubos_altura), color='red', fontsize=10, ha='center')
+        # ax.text(i + 0.5, j + 0.5, altura + 1.5, str(Cubos_altura), color='red', fontsize=10, ha='center')
 
     for z in range(Cubos_altura + 1):
         caja = Cubo([i + 0.5, j + 0.5, (altura - 0.5) - z])
@@ -126,10 +124,10 @@ def AlturaIsla(distancia, radio, altura, i, j, modeIsland):
 
     return Cubos_altura
     
-def crear_cuadrados_svg(ArrAltura):
+def crear_cuadrados_svg(ArrAltura, radio = 1):
     filas, columnas = ArrAltura.shape
-    espacio_entre_cuadrillas = 5
-    lado = 5 * 5
+    lado = 300/(radio) 
+    espacio_entre_cuadrillas = lado * 0.1
     dwg = svgwrite.Drawing('Plano2d.svg', profile='full')
 
     for i in range(filas):
@@ -137,9 +135,9 @@ def crear_cuadrados_svg(ArrAltura):
             x = j * (lado + espacio_entre_cuadrillas)  # Agregar espacio horizontal entre cuadrillas
             y = i * (lado + espacio_entre_cuadrillas)  # Agregar espacio vertical entre cuadrillas
             numero = int(ArrAltura[i,j])
-            dwg.add(dwg.rect(insert=(x, y), size=(lado, lado), fill='black' if numero == 0  else 'red'))
+            dwg.add(dwg.rect(insert=(x, y), size=(lado, lado), fill='#1C2833' if numero == 0  else '#138D75'))
             
-            dwg.add(dwg.text((str(numero) if numero > 0 else ""), insert=(x + lado / 2, y + lado / 2), fill='white', font_size=7, text_anchor='middle', alignment_baseline='middle'))
+            dwg.add(dwg.text((str(numero) if numero > 0 else ""), insert=(x + lado / 2, y + lado / 2), fill='#F4F6F7', font_size=0.3 * lado, text_anchor='middle', alignment_baseline='middle'))
 
     dwg.save()
 
