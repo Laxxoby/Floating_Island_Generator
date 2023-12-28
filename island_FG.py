@@ -5,13 +5,19 @@ from math import sqrt
 import random
 import svgwrite
 
+"""
+    Este programa genera una visualizacion 3d de una isla flotante formada por cubos 3d y crea un archivo .svg 
+    que muestra una visualizacion 2d donde enseña el plano superior con los numero de bloques 
+    que deben ir en la parte inferior.
+"""
+
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 
 def main():
     #mapear()
-    generar_plataforma(5, 10)
+    generar_plataforma()
 
 # Crear un objeto que sea un cubo
 class Cubo: 
@@ -32,8 +38,23 @@ class Cubo:
         ]
         
 
-def generar_plataforma(radio, altura):
+def generar_plataforma():
 
+    """
+    Genera una plataforma tridimensional formada por un conjunto de cubos dentro de un círculo.
+
+    Parámetros:
+    radio -- Radio del círculo que define la forma de la plataforma.
+    altura -- Altura de la plataforma.
+
+    La función crea una plataforma tridimensional dentro de un círculo con el radio dado.
+    Los cubos se generan en posiciones dentro del círculo y se apilan en función de la altura,
+    creando una estructura visual representativa de una plataforma.
+    """
+    
+    #Función para validar los datos de entrada
+    radio, altura, modeIsland = validar_datos()
+    
     global ax
     centro_x, centro_y = radio + 1 , radio + 1 # Calcular el centro de la imagen
     ArrAltura = np.zeros(((radio * 2) + 3 , (radio * 2) + 3 ))
@@ -89,9 +110,9 @@ def AlturaIsla(distancia, radio, altura, i, j):
     
 def crear_cuadrados_svg(ArrAltura):
     filas, columnas = ArrAltura.shape
-    espacio_entre_cuadrillas = 1
-    lado = 5
-    dwg = svgwrite.Drawing('cuadrados_con_espacio.svg', profile='full')
+    espacio_entre_cuadrillas = 5
+    lado = 5 * 5
+    dwg = svgwrite.Drawing('Plano2d.svg', profile='full')
 
     for i in range(filas):
         for j in range(columnas):
@@ -100,9 +121,35 @@ def crear_cuadrados_svg(ArrAltura):
             numero = int(ArrAltura[i,j])
             dwg.add(dwg.rect(insert=(x, y), size=(lado, lado), fill='black' if numero == 0  else 'red'))
             
-            dwg.add(dwg.text((str(numero) if numero > 0 else ""), insert=(x + lado / 2, y + lado / 2), fill='white', font_size=3, text_anchor='middle', alignment_baseline='middle'))
+            dwg.add(dwg.text((str(numero) if numero > 0 else ""), insert=(x + lado / 2, y + lado / 2), fill='white', font_size=7, text_anchor='middle', alignment_baseline='middle'))
 
     dwg.save()
+
+def validar_datos():
+    print("Bienvenido al generador de islas flotantes de Minecraft")
+    radio = validar_numero("Ingresa el radio de la plataforma circular superior: ")
+    altura = validar_numero("Ingresa la altura máxima que puede tener la isla flotante: ", 5)
+    modo = validar_modo()
+    return radio, altura, modo
+
+def validar_numero(mensaje, min_valor=1):
+    while True:
+        try:
+            valor = int(input(mensaje))
+            if valor < min_valor:
+                print("Por favor, ingresa un número mayor o igual a", min_valor)
+                continue
+            return valor
+        except ValueError:
+            print("Por favor, ingresa un número válido.")
+
+
+def validar_modo():
+    while True:
+        modo = input("Ingresa el modo en el que se creará la Isla Flotante (Random o SemiUniforme): ").lower()
+        if modo in ["random", "semiuniforme"]:
+            return modo
+        print("Por favor, ingresa 'random' o 'semiUniforme'.")
 
 
 if __name__ == '__main__':
