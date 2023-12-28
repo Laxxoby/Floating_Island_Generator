@@ -3,6 +3,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 from math import sqrt
 import random
+import csv
 import svgwrite
 
 """
@@ -69,8 +70,13 @@ def generar_plataforma():
                 cubo = Poly3DCollection(caja1.caras, alpha=0.25, facecolors='green')
                 ax.add_collection3d(cubo)
                 artura = AlturaIsla(distancia, radio, altura, i, j, modeIsland)    
-                ArrAltura[i, j] = artura        
+                ArrAltura[i, j] = artura     
+                
+    # crea el svg con las alturas
     crear_cuadrados_svg(ArrAltura,radio)
+    
+    # crea el csv con las alturas
+    crear_cuadrados_csv(ArrAltura)
                 
     # Establecer los límites de los ejes
     ax.set_xlim([0, (radio * 2) + 1])
@@ -140,6 +146,15 @@ def crear_cuadrados_svg(ArrAltura, radio = 1):
             dwg.add(dwg.text((str(numero) if numero > 0 else ""), insert=(x + lado / 2, y + lado / 2), fill='#F4F6F7', font_size=0.3 * lado, text_anchor='middle', alignment_baseline='middle'))
 
     dwg.save()
+    
+def crear_cuadrados_csv(alturas):
+    nombre_archivo = 'alturas.csv'
+    
+    # Escribir la matriz en el archivo CSV
+    with open(nombre_archivo, 'w', newline='') as archivo_csv:
+        escritor_csv = csv.writer(archivo_csv)
+        for fila in alturas:
+            escritor_csv.writerow(fila)
 
 def validar_datos():
     print("Bienvenido al generador de islas flotantes de Minecraft")
