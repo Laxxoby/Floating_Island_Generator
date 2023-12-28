@@ -7,9 +7,8 @@ import csv
 import svgwrite
 
 """
-    Este programa genera una visualizacion 3d de una isla flotante formada por cubos 3d y crea un archivo .svg 
-    que muestra una visualizacion 2d donde enseña el plano superior con los numero de bloques 
-    que deben ir en la parte inferior.
+This program generates a 3D visualization of a floating island made up of 3D cubes and creates an .svg file 
+that shows a 2D visualization with the top view, displaying the number of blocks that should go on the bottom part.
 """
 
 fig = plt.figure()
@@ -17,184 +16,180 @@ ax = fig.add_subplot(111, projection='3d')
 
 
 def main():
-    #mapear()
-    generar_plataforma()
+    generate_platform()
 
-# Crear un objeto que sea un cubo
-class Cubo: 
+
+class Cube:
     """
-    Representa un objeto cúbico en un sistema tridimensional.
+    Represents a cubic object in a three-dimensional system.
 
     Args:
-    - origen (list): Una lista que representa las coordenadas [x, y, z] del origen del cubo.
+    - origin (list): A list representing the [x, y, z] coordinates of the cube's origin.
 
     Attributes:
-    - origen (list): Coordenadas [x, y, z] del origen del cubo.
-    - vertices (numpy.ndarray): Matriz que contiene las coordenadas de los vértices del cubo.
-    - caras (list): Lista que contiene las caras del cubo, definidas por sus vértices.
-
+    - origin (list): [x, y, z] coordinates of the cube's origin.
+    - vertices (numpy.ndarray): Matrix containing the coordinates of the cube's vertices.
+    - faces (list): List containing the faces of the cube, defined by their vertices.
     """
-    def __init__(self, origen): #ejem [0.5, 0.5, 0.5]
-        x,y,z = origen[0], origen[1], origen[2]
-        self.origen = origen
+    def __init__(self, origin): #example [0.5, 0.5, 0.5]
+        x, y, z = origin[0], origin[1], origin[2]
+        self.origin = origin
         self.vertices = np.array([
-            [x - 0.5, y - 0.5, z - 0.5], [x + 0.5, y - 0.5, z - 0.5], [x + 0.5, y + 0.5, z - 0.5], [x - 0.5, y + 0.5, z - 0.5],  # Cara de abajo
+            [x - 0.5, y - 0.5, z - 0.5], [x + 0.5, y - 0.5, z - 0.5], [x + 0.5, y + 0.5, z - 0.5], [x - 0.5, y + 0.5, z - 0.5],  # Bottom face
             [x - 0.5, y - 0.5, z + 0.5], [x + 0.5, y - 0.5, z + 0.5], [x + 0.5, y + 0.5, z + 0.5], [x - 0.5, y + 0.5, z + 0.5]
-            ])
-        self.caras = [
-            [self.vertices[0], self.vertices[1], self.vertices[2], self.vertices[3]],  # Cara de abajo
-            [self.vertices[4], self.vertices[5], self.vertices[6], self.vertices[7]],  # Cara de arriba
-            [self.vertices[0], self.vertices[1], self.vertices[5], self.vertices[4]],  # Cara lateral
-            [self.vertices[2], self.vertices[3], self.vertices[7], self.vertices[6]],  # Cara lateral
-            [self.vertices[1], self.vertices[2], self.vertices[6], self.vertices[5]],  # Cara trasera
-            [self.vertices[0], self.vertices[3], self.vertices[7], self.vertices[4]]   # Cara delantera
+        ])
+        self.faces = [
+            [self.vertices[0], self.vertices[1], self.vertices[2], self.vertices[3]],  # Bottom face
+            [self.vertices[4], self.vertices[5], self.vertices[6], self.vertices[7]],  # Top face
+            [self.vertices[0], self.vertices[1], self.vertices[5], self.vertices[4]],  # Side face
+            [self.vertices[2], self.vertices[3], self.vertices[7], self.vertices[6]],  # Side face
+            [self.vertices[1], self.vertices[2], self.vertices[6], self.vertices[5]],  # Back face
+            [self.vertices[0], self.vertices[3], self.vertices[7], self.vertices[4]]   # Front face
         ]
-        
 
-def generar_plataforma():
+
+def generate_platform():
 
     """
-    Genera una plataforma tridimensional formada por un conjunto de cubos dentro de un círculo.
+    Generates a three-dimensional platform formed by a set of cubes within a circle.
 
-    Parámetros:
-    radio -- Radio del círculo que define la forma de la plataforma.
-    altura -- Altura de la plataforma.
+    Parameters:
+    radius -- Radius of the circle defining the platform's shape.
+    height -- Height of the platform.
 
-    La función crea una plataforma tridimensional dentro de un círculo con el radio dado.
-    Los cubos se generan en posiciones dentro del círculo y se apilan en función de la altura,
-    creando una estructura visual representativa de una plataforma.
+    The function creates a three-dimensional platform within a circle with the given radius.
+    Cubes are generated at positions within the circle and stacked based on the height,
+    creating a visually representative structure of a platform.
     """
     
-    #Función para validar los datos de entrada
-    radio, altura, modeIsland = validar_datos()
+    # Function to validate input data
+    radius, height, island_mode = validate_data()
     
     global ax
-    centro_x, centro_y = radio + 1 , radio + 1 # Calcular el centro de la imagen
-    ArrAltura = np.zeros(((radio * 2) + 3 , (radio * 2) + 3 ))
+    center_x, center_y = radius + 1, radius + 1  # Calculate the image center
+    height_array = np.zeros(((radius * 2) + 3, (radius * 2) + 3))
     
-    for i in range((radio * 2) + 1):
-        for j in range((radio * 2) + 1):
-            distancia = (i - centro_x)**2 + (j - centro_y)**2  # Calcular la distancia al centro
+    for i in range((radius * 2) + 1):
+        for j in range((radius * 2) + 1):
+            distance = (i - center_x)**2 + (j - center_y)**2  # Calculate distance to center
             
-            # Si la distancia es menor o igual al radio al cuadrado, está dentro del círculo
-            if distancia <= radio**2 - 1:
-                caja1 = Cubo([i + 0.5 , j + 0.5, altura + 0.5])
-                cubo = Poly3DCollection(caja1.caras, alpha=0.25, facecolors='green')
-                ax.add_collection3d(cubo)
-                artura = AlturaIsla(distancia, radio, altura, i, j, modeIsland)    
-                ArrAltura[i, j] = artura     
+            # If the distance is less than or equal to the squared radius, it's inside the circle
+            if distance <= radius**2 - 1:
+                box1 = Cube([i + 0.5, j + 0.5, height + 0.5])
+                cube = Poly3DCollection(box1.faces, alpha=0.25, facecolors='green')
+                ax.add_collection3d(cube)
+                island_height = IslandHeight(distance, radius, height, i, j, island_mode)    
+                height_array[i, j] = island_height     
                 
-    # crea el svg con las alturas
-    crear_cuadrados_svg(ArrAltura,radio)
+    # create svg with heights
+    create_square_svg(height_array, radius)
     
-    # crea el csv con las alturas
-    crear_cuadrados_csv(ArrAltura)
+    # create csv with heights
+    create_square_csv(height_array)
                 
-    # Establecer los límites de los ejes
-    ax.set_xlim([0, (radio * 2) + 1])
-    ax.set_ylim([0, (radio * 2) + 1])
-    ax.set_zlim([0, altura + 3])
+    # Set axis limits
+    ax.set_xlim([0, (radius * 2) + 1])
+    ax.set_ylim([0, (radius * 2) + 1])
+    ax.set_zlim([0, height + 3])
 
-    # Etiquetar los ejes
+    # Label axes
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
 
-    # Mostrar el gráfico
-    #plt.show()
+    # Show the plot
+    plt.show()
 
-def AlturaIsla(distancia, radio, altura, i, j, modeIsland):
+def IslandHeight(distance, radius, height, i, j, islandMode):
     """
-    Calcula la altura de cada cubo en función de su distancia al centro de la isla, y genera la representación gráfica en 3D.
+    Calculates the height of each cube based on its distance from the center of the island and generates a 3D graphical representation.
 
-    Parámetros:
-    distancia -- Distancia al centro de la isla.
-    radio -- Radio del círculo que define la isla.
-    altura -- Altura máxima que puede tener la isla.
-    i -- Coordenada x del cubo.
-    j -- Coordenada y del cubo.
-    modeIsland -- Mode de la isla
+    Parameters:
+    distance -- Distance to the center of the island.
+    radius -- Radius of the circle defining the island.
+    height -- Maximum height the island can have.
+    i -- x-coordinate of the cube.
+    j -- y-coordinate of the cube.
+    islandMode -- Island mode.
 
-    Retorna:
-    Cubos_altura -- Altura del cubo generado.
+    Returns:
+    Cubes_height -- Height of the generated cube.
 
-    La función calcula la altura del cubo dependiendo de la distancia proporcionada y genera un conjunto de cubos en representación gráfica en 3D.
-    Además, agrega un texto en la parte superior de algunos cubos mostrando la cantidad de cubos en esa posición.
+    The function calculates the height of the cube depending on the provided distance and generates a set of cubes in a 3D graphical representation.
+    Additionally, it adds text on top of some cubes showing the quantity of cubes at that position.
     """
-    global ax 
-    porcentaje = ((abs(sqrt(distancia) - radio)) / radio) * 100
+    global ax
+    percentage = ((abs(sqrt(distance) - radius)) / radius) * 100
 
-    if porcentaje <= 100 and porcentaje > 80:
-        Cubos_altura = random.randint(1 if modeIsland == "random" else int(altura * 0.8), altura)
-    elif porcentaje <= 80 and porcentaje > 60:
-        Cubos_altura = random.randint(1 if modeIsland == "random" else int(altura * 0.6), int(altura * 0.8))
-    elif porcentaje <= 60 and porcentaje > 40:
-        Cubos_altura = random.randint(1 if modeIsland == "random" else int(altura * 0.4), int(altura * 0.6))
-    elif porcentaje <= 40 and porcentaje > 20:
-        Cubos_altura = random.randint(1 if modeIsland == "random" else int(altura * 0.2), int(altura * 0.4))
-    elif porcentaje <= 20 and porcentaje > 0:
-        Cubos_altura = random.randint(1 , int(altura * 0.2))
-        # ax.text(i + 0.5, j + 0.5, altura + 1.5, str(Cubos_altura), color='red', fontsize=10, ha='center')
+    if percentage <= 100 and percentage > 80:
+        Cubes_height = random.randint(1 if islandMode == "random" else int(height * 0.8), height)
+    elif percentage <= 80 and percentage > 60:
+        Cubes_height = random.randint(1 if islandMode == "random" else int(height * 0.6), int(height * 0.8))
+    elif percentage <= 60 and percentage > 40:
+        Cubes_height = random.randint(1 if islandMode == "random" else int(height * 0.4), int(height * 0.6))
+    elif percentage <= 40 and percentage > 20:
+        Cubes_height = random.randint(1 if islandMode == "random" else int(height * 0.2), int(height * 0.4))
+    elif percentage <= 20 and percentage > 0:
+        Cubes_height = random.randint(1, int(height * 0.2))
+        # ax.text(i + 0.5, j + 0.5, height + 1.5, str(Cubes_height), color='red', fontsize=10, ha='center')
 
-    for z in range(Cubos_altura + 1):
-        caja = Cubo([i + 0.5, j + 0.5, (altura - 0.5) - z])
-        cubo = Poly3DCollection(caja.caras, alpha=0.25, facecolors='cyan' if z % 2 == 0 else 'blue')
-        ax.add_collection3d(cubo)
+    for z in range(Cubes_height + 1):
+        box = Cube([i + 0.5, j + 0.5, (height - 0.5) - z])
+        cube = Poly3DCollection(box.faces, alpha=0.25, facecolors='cyan' if z % 2 == 0 else 'blue')
+        ax.add_collection3d(cube)
 
-    return Cubos_altura
-    
-def crear_cuadrados_svg(ArrAltura, radio = 1):
-    filas, columnas = ArrAltura.shape
-    lado = 300/(radio) 
-    espacio_entre_cuadrillas = lado * 0.1
-    dwg = svgwrite.Drawing('Plano2d.svg', profile='full')
+    return Cubes_height
 
-    for i in range(filas):
-        for j in range(columnas):
-            x = j * (lado + espacio_entre_cuadrillas)  # Agregar espacio horizontal entre cuadrillas
-            y = i * (lado + espacio_entre_cuadrillas)  # Agregar espacio vertical entre cuadrillas
-            numero = int(ArrAltura[i,j])
-            dwg.add(dwg.rect(insert=(x, y), size=(lado, lado), fill='#1C2833' if numero == 0  else '#138D75'))
+def create_square_svg(HeightArr, radius=1):
+    rows, columns = HeightArr.shape
+    side = 300 / radius 
+    space_between_squares = side * 0.1
+    dwg = svgwrite.Drawing('2dPlane.svg', profile='full')
+
+    for i in range(rows):
+        for j in range(columns):
+            x = j * (side + space_between_squares)  # Add horizontal space between squares
+            y = i * (side + space_between_squares)  # Add vertical space between squares
+            number = int(HeightArr[i, j])
+            dwg.add(dwg.rect(insert=(x, y), size=(side, side), fill='#1C2833' if number == 0 else '#138D75'))
             
-            dwg.add(dwg.text((str(numero) if numero > 0 else ""), insert=(x + lado / 2, y + lado / 2), fill='#F4F6F7', font_size=0.3 * lado, text_anchor='middle', alignment_baseline='middle'))
+            dwg.add(dwg.text((str(number) if number > 0 else ""), insert=(x + side / 2, y + side / 2), fill='#F4F6F7', font_size=0.3 * side, text_anchor='middle', alignment_baseline='middle'))
 
     dwg.save()
-    
-def crear_cuadrados_csv(alturas):
-    nombre_archivo = 'alturas.csv'
-    
-    # Escribir la matriz en el archivo CSV
-    with open(nombre_archivo, 'w', newline='') as archivo_csv:
-        escritor_csv = csv.writer(archivo_csv)
-        for fila in alturas:
-            escritor_csv.writerow(fila)
 
-def validar_datos():
-    print("Bienvenido al generador de islas flotantes de Minecraft")
-    radio = validar_numero("Ingresa el radio de la plataforma circular superior: ")
-    altura = validar_numero("Ingresa la altura máxima que puede tener la isla flotante: ", 5)
-    modo = validar_modo()
-    return radio, altura, modo
+def create_square_csv(heights):
+    file_name = 'heights.csv'
+    
+    # Write the matrix into the CSV file
+    with open(file_name, 'w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        for row in heights:
+            csv_writer.writerow(row)
 
-def validar_numero(mensaje, min_valor=1):
+def validate_data():
+    print("Welcome to the floating islands generator for Minecraft")
+    radius = validate_number("Enter the radius of the upper circular platform: ")
+    height = validate_number("Enter the maximum height the floating island can have: ", 5)
+    mode = validate_mode()
+    return radius, height, mode
+
+def validate_number(message, min_value=1):
     while True:
         try:
-            valor = int(input(mensaje))
-            if valor < min_valor:
-                print("Por favor, ingresa un número mayor o igual a", min_valor)
+            value = int(input(message))
+            if value < min_value:
+                print("Please enter a number greater than or equal to", min_value)
                 continue
-            return valor
+            return value
         except ValueError:
-            print("Por favor, ingresa un número válido.")
+            print("Please enter a valid number.")
 
-
-def validar_modo():
+def validate_mode():
     while True:
-        modo = input("Ingresa el modo en el que se creará la Isla Flotante (random o semiUniforme): ").lower()
-        if modo in ["random", "semiuniforme"]:
-            return modo
-        print("Por favor, ingresa 'random' o 'semiUniforme'.")
-
+        mode = input("Enter the mode in which the Floating Island will be created (random or semiUniform): ").lower()
+        if mode in ["random", "semiuniform"]:
+            return mode
+        print("Please enter 'random' or 'semiuniform'.")
 
 if __name__ == '__main__':
     main()
