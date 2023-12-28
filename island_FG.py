@@ -101,6 +101,7 @@ def AlturaIsla(distancia, radio, altura, i, j, modeIsland):
     altura -- Altura máxima que puede tener la isla.
     i -- Coordenada x del cubo.
     j -- Coordenada y del cubo.
+    modeIsland -- Mode de la isla
 
     Retorna:
     Cubos_altura -- Altura del cubo generado.
